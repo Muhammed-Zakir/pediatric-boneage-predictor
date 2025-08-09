@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.envrc
+.venv/
+venv/
+env/
+.ipynb_checkpoints
+.DS_Store
+best_resnet50_model.pth
+*.csv
+*.zip
