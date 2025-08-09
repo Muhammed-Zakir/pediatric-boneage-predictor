@@ -2,7 +2,6 @@ import torch
 from torchvision import models, transforms
 from torch import nn
 from PIL import Image
-from PIL import ImageStat
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -36,18 +35,3 @@ def preprocess_image(image: Image.Image):
     ])
     return transform(image).unsqueeze(0)
 
-
-def is_probable_xray(image: Image.Image, threshold=0.3):
-    """
-    Simple heuristic: calculate ratio of pixels with brightness in
-    typical X-ray range (dark + midtones) vs total pixels.
-    Returns True if ratio above threshold.
-    """
-    gray = image.convert("L")
-    stat = ImageStat.Stat(gray)
-    mean_brightness = stat.mean[0] / 255.0  # Normalize 0-1
-
-    # If mean brightness is too high or too low, probably not X-ray
-    if mean_brightness < 0.1 or mean_brightness > 0.6:
-        return False
-    return True
