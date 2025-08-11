@@ -46,7 +46,7 @@ st.write("""
 Distribution
 """)
 # Histogram Plot
-fig_hist, ax = plt.subplots()
+fig_hist, ax = plt.subplots(figsize=(4, 2.5))
 sns.histplot(df["boneage"], bins=30, ax=ax)
 ax.set_xlabel("Age (months)")
 ax.set_ylabel("Count")
