@@ -68,10 +68,12 @@ status_text = st.empty()
 
 total = len(uploaded_files)
 
+
 if uploaded_files:
     results = []
     error_messages = []
-
+    st.write(type(results))
+    st.write(results)
     for uploaded_file in uploaded_files:
         image = Image.open(uploaded_file).convert('RGB')
 
