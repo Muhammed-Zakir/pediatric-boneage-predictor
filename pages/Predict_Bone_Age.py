@@ -6,6 +6,8 @@ import pandas as pd
 from PIL import ImageStat
 import time
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 st.title("Predict Bone Age with Confidence Score")
 
 
@@ -73,20 +75,22 @@ if uploaded_files:
     for uploaded_file in uploaded_files:
         image = Image.open(uploaded_file).convert('RGB')
 
-        #  Image size validation
+        # Validate size
         if not is_valid_image_size(image):
-            error_messages.append(uploaded_file.name)
-            continue
-        #  Image
-        if not is_probable_xray(image):
-            error_messages.append(uploaded_file.name)
+            error_messages.append(f"{uploaded_file.name} - Invalid size")
             continue
 
-        input_tensor = preprocess_image(image)
+        # Validate if X-ray
+        if not is_probable_xray(image):
+            error_messages.append(f"{uploaded_file.name} - Not an X-ray")
+            continue
+
+        # Preprocess and predict
+        input_tensor = preprocess_image(image).to(device)  # ensure correct device
         with torch.no_grad():
-            pred = loaded_model(input_tensor).item()
-            time.sleep(0.5)  # simulate prediction
-            results.append(f"Predicted: {image}")
+            pred = loaded_model(input_tensor).cpu().item()  # move to CPU and convert
+
+        # Save results
         results.append({
             "filename": uploaded_file.name,
             "predicted_age_months": round(pred, 2),
