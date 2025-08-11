@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.title("Machine Learning")
+# st.title("Machine Learning")
 
 st.write("""
 ### Deep Learning & CNN for Images

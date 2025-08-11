@@ -50,9 +50,9 @@ def is_probable_xray(image: Image.Image, threshold=0.3):
     return True
 
 
-model, epoch, val_loss = get_model_and_info()
+loaded_model, _epoch, _val_loss = get_model_and_info()
 
-st.info(f"Model trained until **epoch {epoch}** with final validation loss **{val_loss}**")
+st.info(f"Model trained until **epoch {_epoch}** with final validation loss **{_val_loss}**")
 
 
 uploaded_files = st.file_uploader(
@@ -84,7 +84,7 @@ if uploaded_files:
 
         input_tensor = preprocess_image(image)
         with torch.no_grad():
-            pred = model(input_tensor).item()
+            pred = loaded_model(input_tensor).item()
             time.sleep(0.5)  # simulate prediction
             results.append(f"Predicted: {image}")
         results.append({
@@ -92,13 +92,6 @@ if uploaded_files:
             "predicted_age_months": round(pred, 2),
             "image": image
         })
-
-        # Update progress bar
-        progress = int(i / total * 100)
-        progress_bar.progress(progress)
-        status_text.text(f"Processing {i} of {total} images...")
-
-    status_text.text("✅ Batch prediction completed!")
 
     # Show predictions first
     if results:
