@@ -6,6 +6,13 @@ from PIL import Image
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
+def enable_dropout(model):
+    """Enable dropout during inference for uncertainty estimation."""
+    for m in model.modules():
+        if isinstance(m, nn.Dropout):
+            m.train()
+
+
 def load_model_(checkpoint_path):
     """
     Loads a pre-trained ResNet-50 model from a checkpoint file.
@@ -55,13 +62,6 @@ def preprocess_image(image: Image.Image):
         )
     ])
     return transform(image).unsqueeze(0)
-
-
-def enable_dropout(model):
-    """Enable dropout during inference for uncertainty estimation."""
-    for m in model.modules():
-        if isinstance(m, nn.Dropout):
-            m.train()
 
 
 def predict_with_uncertainty(model, input_data, n_passes=25):
