@@ -70,21 +70,23 @@ total = len(uploaded_files)
 
 
 if uploaded_files:
-    results = []
-    error_messages = []
+    results = {}
+    error_messages = {}
+
     st.write(type(results))
     st.write(results)
+
     for uploaded_file in uploaded_files:
         image = Image.open(uploaded_file).convert('RGB')
 
         # Validate size
         if not is_valid_image_size(image):
-            error_messages.append(f"{uploaded_file.name} - Invalid size")
+            error_messages[uploaded_file.name] = "Invalid size"
             continue
 
         # Validate if X-ray
         if not is_probable_xray(image):
-            error_messages.append(f"{uploaded_file.name} - Not an X-ray")
+            error_messages[uploaded_file.name] = "Not an X-ray"
             continue
 
         # Preprocess and predict
@@ -93,11 +95,11 @@ if uploaded_files:
             pred = loaded_model(input_tensor).cpu().item()  # move to CPU and convert
 
         # Save results
-        results.append({
-            "filename": uploaded_file.name,
+        results[uploaded_file.name] = {
             "predicted_age_months": round(pred, 2),
             "image": image
-        })
+        }
+
 
     # Show predictions first
     if results:
