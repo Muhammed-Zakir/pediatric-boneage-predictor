@@ -1,7 +1,7 @@
 import streamlit as st
 from PIL import Image, ImageStat
 import torch
-from model import load_model, preprocess_image
+from model import preprocess_image, load_model_
 import pandas as pd
 from io import BytesIO
 
@@ -9,13 +9,15 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 st.title("Predict Bone Age with Confidence Score")
 
+
 @st.cache_resource
-def get_model_and_info():
-    checkpoint = torch.load("best_resnet50_model.pth", map_location="cpu")
-    model = load_model("best_resnet50_model.pth")
+def get_model_and_info(model_path):
+    checkpoint = torch.load(model_path, map_location="cpu")
+    model = load_model_(model_path)
     epoch = checkpoint.get('epoch', 'N/A')
     val_loss = checkpoint.get('val_loss', 'N/A')
     return model, epoch, val_loss
+
 
 def is_valid_image_size(image: Image.Image, min_size=200, max_size=3000, aspect_ratio_tol=0.3):
     w, h = image.size
@@ -26,6 +28,7 @@ def is_valid_image_size(image: Image.Image, min_size=200, max_size=3000, aspect_
         return False
     return True
 
+
 def is_probable_xray(image: Image.Image, threshold=0.3):
     gray = image.convert("L")
     stat = ImageStat.Stat(gray)
@@ -34,9 +37,26 @@ def is_probable_xray(image: Image.Image, threshold=0.3):
         return False
     return True
 
-loaded_model, _epoch, _val_loss = get_model_and_info()
 
-st.info(f"Model trained until **epoch {_epoch}** with final validation loss **{_val_loss}**")
+model_mapping = {
+    "ResNet-50 (Bone Age Prediction)": "best_resnet50_model.pth",
+    "EfficientNet (Bone Age Prediction)": "best_efficientnet_model.pth",
+}
+
+display_names = list(model_mapping.keys())
+
+selected_display_name = st.selectbox(
+    "Choose a model:",
+    options=display_names
+)
+
+if selected_display_name == "ResNet-50 (Bone Age Prediction)":
+    st.info("This model performs with an average accuracy of 9.76 months")
+else:
+    st.info("This model performs with an average accuracy of 9.83 months")
+
+selected_model_path = model_mapping[selected_display_name]
+loaded_model, _epoch, _val_loss = get_model_and_info(selected_model_path)
 
 uploaded_files = st.file_uploader(
     "Upload Hand X-ray images",
